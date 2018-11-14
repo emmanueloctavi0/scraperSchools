@@ -16,8 +16,9 @@ url = 'http://www.mejoratuescuela.org/escuelas/index/{}'
 @click.command()
 @click.option('--cct', type=str, help='Especifica el cct de una escuela para obtener sus datos')
 @click.option('--to-json', is_flag=True, help='Devuelve los datos en formato JSON')
+@click.option('--to-html', is_flag=True, help='Devuelve los datos en una table HTML')
 
-def getInfoSchool(cct, to_json):
+def getInfoSchool(cct, to_json, to_html):
     '''
     Obten información básica de las escuelas de México
     '''
@@ -31,15 +32,82 @@ def getInfoSchool(cct, to_json):
         else:
             if to_json:
                 print(json.dumps(objectSchool))
+            elif to_html:
+                printInfoSchoolHTML(objectSchool)
             else:
-                for key, value in objectSchool.items():
-                    if key == 'direccion':
-                        for key2, value2 in value.items():
-                            print('{:12} {}'.format(key2, value2))
-                    else:
-                        print('{:12} {}'.format(key,value))
+                printInfoSchool(objectSchool)
 
 # DEFINICION DE FUNCIONES
+def printInfoSchool(objectSchool):
+    for key, value in objectSchool.items():
+        if key == 'direccion':
+            for key2, value2 in value.items():
+                print('{:12} {}'.format(key2, value2))
+        else:
+            print('{:12} {}'.format(key,value))
+
+
+def printInfoSchoolHTML(objectSchool):
+
+    plantilla = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Escuelas</title>
+    <style>
+        td {{
+            padding: 10px;
+        }}
+        th, td, table {{
+            border: 1px solid black;
+        }}
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Calle</th>
+            <th>Municipio</th>
+            <th>Localidad</th>
+            <th>Entidad</th>
+            <th>CCT</th>
+            <th>Nivel</th>
+            <th>Turno</th>
+            <th>Tipo</th>
+            <th>Teléfonos</th>
+        </tr>
+        {}
+    </table>
+</body>
+</html>
+    """
+    arrayValues = []
+    for key, value in objectSchool.items():
+        if key == 'direccion':
+            for value2 in value.values():
+                arrayValues.append(value2)
+        else:
+            arrayValues.append(value)
+
+    tr = '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(
+        arrayValues[0],
+        arrayValues[1],
+        arrayValues[2],
+        arrayValues[3],
+        arrayValues[4],
+        arrayValues[5],
+        arrayValues[6],
+        arrayValues[7],
+        arrayValues[8],
+        arrayValues[9],
+    )
+    html = plantilla.format(tr)
+    print(html)
+
 def getSchoolByCCT(cct):
     global url
     
@@ -102,19 +170,19 @@ def getInfoFromHtml(html):
             school['telefonos'] = item.string[11:]
     
     #School's count students
-    students = html.select('.datos-counters-1 .h3-num-datos')
-    if len(students) > 0:
-        school['alumnos'] = int(students[0].string)
+    # students = html.select('.datos-counters-1 .h3-num-datos')
+    # if len(students) > 0:
+    #     school['alumnos'] = int(students[0].string)
     
     #School's count employes
-    employes = html.select('.datos-counters-2 .h3-num-datos')
-    if len(employes) > 0:
-        school['trabajadores'] = int(employes[0].string)
+    # employes = html.select('.datos-counters-2 .h3-num-datos')
+    # if len(employes) > 0:
+    #     school['trabajadores'] = int(employes[0].string)
 
     #School's count groups
-    groups = html.select('.datos-counters-3 .h3-num-datos')
-    if len(groups) > 0:    
-        school['grupos'] = int(groups[0].string)
+    # groups = html.select('.datos-counters-3 .h3-num-datos')
+    # if len(groups) > 0:    
+    #     school['grupos'] = int(groups[0].string)
 
     return school
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from requests import get, post
@@ -6,6 +6,8 @@ from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
 import click
+import sys
+import csv
 import json
 
 # DEFINICION DE CONSTANTES
@@ -16,9 +18,10 @@ url = 'http://www.mejoratuescuela.org/escuelas/index/{}'
 @click.command()
 @click.option('--cct', type=str, help='Especifica el cct de una escuela para obtener sus datos')
 @click.option('--to-json', is_flag=True, help='Devuelve los datos en formato JSON')
-@click.option('--to-html', is_flag=True, help='Devuelve los datos en una table HTML')
+@click.option('--to-html', is_flag=True, help='Devuelve los datos en una tabla HTML')
+@click.option('--to-csv', is_flag=True, help='Devuelve los datos en formato csv')
 
-def getInfoSchool(cct, to_json, to_html):
+def getInfoSchool(cct, to_json, to_html, to_csv):
     '''
     Obten información básica de las escuelas de México
     '''
@@ -34,6 +37,8 @@ def getInfoSchool(cct, to_json, to_html):
                 print(json.dumps(objectSchool))
             elif to_html:
                 printInfoSchoolHTML(objectSchool)
+            elif to_csv:
+                printInfoSchoolCSV(objectSchool)
             else:
                 printInfoSchool(objectSchool)
 
@@ -46,6 +51,21 @@ def printInfoSchool(objectSchool):
         else:
             print('{:12} {}'.format(key,value))
 
+def printInfoSchoolCSV(objectSchool):
+    cvs_out = csv.writer(sys.stdout)
+
+    cvs_out.writerow([
+        'Nombre',
+        'Calle' ,
+        'Municipio',
+        'Localidad',
+        'Entidad',
+        'CCT',
+        'Nivel',
+        'Turno',
+        'Tipo',
+        'Teléfonos'
+    ])
 
 def printInfoSchoolHTML(objectSchool):
 
@@ -198,7 +218,9 @@ def is_good_response(resp):
             and content_type.find('html') > -1)
 
 def getAllSchools(entidad):
-
+    """
+    Returns the json file where are all mexico's states
+    """
     payload = {
         'entidad': entidad,
         'localidad': '',
@@ -218,4 +240,3 @@ def getAllSchools(entidad):
 # INICIA PROGRAMA
 if __name__ == '__main__':
     getInfoSchool()
-    pass

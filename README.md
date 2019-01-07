@@ -4,9 +4,24 @@ Comando hecho en Python que extrae la información de una escuela mexicana a tra
 ### Requisitos
 
 1. Python 3.7
-2. Tener instalado el modulo click
 ```bash
-pip3 install click
+python -m venv .env
+```
+
+Activar env en Linux
+```bash
+source .env/bin/activate
+```
+
+Activar env en Windows
+```bash
+.env\Scripts\activate.bat
+```
+
+Instalar requerimientos
+```bash
+python -m pip install --upgrade pip
+pip install -r requirement.txt
 ```
 
 ### Ejecutar el script
